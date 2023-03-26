@@ -100,24 +100,6 @@ static int poll_comm(struct core_object *co, struct state_object *so, struct pol
 static void reset_poll_state(struct state_object * so);
 
 /**
- * debug_print_req
- * <p>
- * Prints a request to the terminal.
- * </p>
- * @param so the state object.
- */
-static void debug_print_req(struct state_object * so);
-
-/**
- * debug_print_res
- * <p>
- * Prints a response to the terminal.
- * </p>
- * @param so the state object.
- */
-static void debug_print_res(struct state_object * so);
-
-/**
  * poll_remove_connection
  * <p>
  * Close a connection and remove the fd from the list of pollfds.
@@ -330,25 +312,13 @@ enum pollin_handle_result {
 };
 
 static bool pollin_handle(struct core_object *co, struct state_object *so, struct pollfd *pollfd) {
-    const int read_request_result = read_request(pollfd->fd, so);
+    const int read_request_result = co->handlers.read_request(pollfd->fd, so);
     if (read_request_result == READ_REQUEST_SUCCESS) {
-        handle_request(co);
+        co->handlers.handle_request(co);
     }
     if (read_request_result != READ_REQUEST_EOF) {
-        // TODO remove this, only for demo purposes
-        debug_print_req(so);
-
-        if (write_response(pollfd->fd, so) == -1) {
+        if (co->handlers.write_response(pollfd->fd, so) == -1) {
             return POLLIN_HANDLE_RESULT_FATAL;
-        }
-
-        // TODO remove this, only for demo purposes
-        debug_print_res(so);
-
-        if (so->broadcast) { // TODO this isn't set by anything yet, should be set during handle_request()
-            if (write_broadcast(co, so) == -1) {
-                return POLLIN_HANDLE_RESULT_FATAL;
-            }
         }
     }
     reset_poll_state(so);
@@ -387,24 +357,6 @@ static void reset_poll_state(struct state_object * so) {
     destroy_request(&so->req);
     destroy_response(&so->res);
     so->broadcast = false;
-}
-
-static void debug_print_req(struct state_object * so) {
-    printf("HEADER:\nversion: %d\n action: %d\n object %d\nbody size: %d\n", so->req->header.version, so->req->header.action, so->req->header.object, so->req->header.body_size);
-    if (so->req->create_user) {
-        printf("CREATE USER:\ndisplay name: %s\nlogin token: %s\npassword: %s\n ", so->req->create_user->display_name, so->req->create_user->login_token, so->req->create_user->password);
-    } else if (so->req->create_auth) {
-        printf("CREATE AUTH:\nlogin token: %s\npassword: %s\n", so->req->create_auth->login_token, so->req->create_auth->password);
-    } else if (so->req->create_message) {
-        printf("CREATE MESSAGE:\ndisplay name: %s\nchannel name: %s\nmessage content: %s\ntimestamp: %"PRIu64"\n", so->req->create_message->display_name, so->req->create_message->channel_name, so->req->create_message->message_content, so->req->create_message->timestamp);
-    } else if (so->req->create_channel) {
-        printf("CREATE CHANNEL:\ndisplay name: %s\nchannel name: %s\npublic: %s\n", so->req->create_channel->display_name, so->req->create_channel->channel_name, so->req->create_channel->public ? "True" : "False");
-    }
-}
-
-static void debug_print_res(struct state_object * so) {
-    printf("RESPONSE RAW HEADER: %"PRIu32"\n", so->res->raw_header);
-    printf("RESPONSE RAW BODY: %s\n", so->res->raw_body);
 }
 
 static void

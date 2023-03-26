@@ -7,10 +7,13 @@ project(HttpServer
 set(CMAKE_C_STANDARD 17)
 
 add_subdirectory(core-lib)
+add_subdirectory(http)
 add_subdirectory(poll-server)
 add_subdirectory(core)
 
+target_link_libraries(http PUBLIC core-lib)
 target_link_libraries(poll-server PUBLIC core-lib)
+target_link_libraries(core PUBLIC http)
 target_link_libraries(core PUBLIC core-lib)
 add_dependencies(core poll-server)
 add_dependencies(poll-server core-lib)

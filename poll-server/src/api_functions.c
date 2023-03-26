@@ -1,5 +1,5 @@
 #include <core-lib/api_functions.h>
-#include "../include/poll_server.h"
+#include "poll_server.h"
 #include "database.h"
 
 int initialize_server(struct core_object *co)

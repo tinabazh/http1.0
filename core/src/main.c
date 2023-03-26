@@ -7,7 +7,8 @@
 
 #include <getopt.h>
 #include <string.h>
-#include <dlfcn.h>
+
+#include <http/handlers.h>
 
 #define LOG_FILE_NAME "log.csv"
 #define LOG_OPEN_MODE "w" // Mode is set to truncate for independent results from each experiment.
@@ -196,6 +197,9 @@ static int run(const struct dc_env *env, struct dc_error *err, struct dc_applica
     
     // create core object
     ret_val = setup_core_object(&co, port_num, ip_addr);
+    co.handlers.handle_request = handle_request_http;
+    co.handlers.read_request = read_request_http;
+    co.handlers.write_response = write_response_http;
     if (ret_val == -1)
     {
         return EXIT_FAILURE;

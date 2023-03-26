@@ -4,6 +4,19 @@
 #include <netinet/in.h>
 #include <stdio.h>
 
+struct core_object;
+struct state_object;
+
+typedef int (*read_request_handler)(int fd, struct state_object * so);
+typedef void (*handle_request_handler)(struct core_object * co);
+typedef int (*write_response_handler)(int fd, struct state_object * so);
+
+struct handlers {
+    read_request_handler read_request;
+    handle_request_handler handle_request;
+    write_response_handler write_response;
+};
+
 /**
  * core_object
  * <p>
@@ -18,6 +31,7 @@ struct core_object {
     FILE *log_file;
     struct sockaddr_in listen_addr;
     struct state_object *so;
+    struct handlers handlers;
 };
 
 #endif //SCALABLE_SERVER_OBJECTS_H
