@@ -3,12 +3,6 @@ set(INCLUDE_DIR include)
 set(SOURCE_LIST
         ${SOURCE_DIR}/api_functions.c
         ${SOURCE_DIR}/poll_server.c
-        ${SOURCE_DIR}/database.c
-        ${SOURCE_DIR}/read.c
-        ${SOURCE_DIR}/handle.c
-        ${SOURCE_DIR}/respond.c
-        ${SOURCE_DIR}/broadcast.c
-        ${SOURCE_DIR}/request.c
         ${SOURCE_DIR}/response.c
         ${SOURCE_DIR}/util.c
         ${SOURCE_DIR}/active_users.c
@@ -16,11 +10,6 @@ set(SOURCE_LIST
 set(HEADER_LIST
         ${INCLUDE_DIR}/objects.h
         ${INCLUDE_DIR}/poll_server.h
-        ${INCLUDE_DIR}/database.h
-        ${INCLUDE_DIR}/read.h
-        ${INCLUDE_DIR}/respond.h
-        ${INCLUDE_DIR}/broadcast.h
-        ${INCLUDE_DIR}/request.h
         ${INCLUDE_DIR}/response.h
         ${INCLUDE_DIR}/util.h
         ${INCLUDE_DIR}/active_users.h

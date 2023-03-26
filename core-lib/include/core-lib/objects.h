@@ -6,16 +6,16 @@
 
 struct core_object;
 struct state_object;
+struct pollfd;
 
-typedef int (*read_request_handler)(int fd, struct state_object * so);
-typedef void (*handle_request_handler)(struct core_object * co);
-typedef int (*write_response_handler)(int fd, struct state_object * so);
-
-struct handlers {
-    read_request_handler read_request;
-    handle_request_handler handle_request;
-    write_response_handler write_response;
+enum pollin_handle_result {
+    POLLIN_HANDLE_RESULT_OK,
+    POLLIN_HANDLE_RESULT_EOF,
+    POLLIN_HANDLE_RESULT_FATAL,
 };
+
+// returns pollin_handle_result
+typedef int (*pollin_handler)(struct core_object *co, struct state_object *so, int fd);
 
 /**
  * core_object
@@ -31,7 +31,7 @@ struct core_object {
     FILE *log_file;
     struct sockaddr_in listen_addr;
     struct state_object *so;
-    struct handlers handlers;
+    pollin_handler pollin_handler;
 };
 
 #endif //SCALABLE_SERVER_OBJECTS_H

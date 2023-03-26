@@ -2,7 +2,6 @@
 #define SCALABLE_SERVER_POLL_OBJECTS_H
 
 #include <core-lib/objects.h>
-#include <request.h>
 #include <response.h>
 
 #include <ndbm.h>
@@ -117,14 +116,7 @@ struct state_object {
     int client_fd[MAX_CONNECTIONS];
     struct sockaddr_in client_addr[MAX_CONNECTIONS];
     size_t num_connections;
-    DBM * user_db;
-    DBM * message_db;
-    DBM * channel_db;
-    DBM * auth_db;
-    struct request * req;
-    struct response * res;
     struct active_users active_users;
-    bool broadcast;
 };
 
 #endif //SCALABLE_SERVER_POLL_OBJECTS_H

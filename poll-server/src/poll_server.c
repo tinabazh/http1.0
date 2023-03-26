@@ -1,10 +1,5 @@
-#include "../include/objects.h"
-#include "../include/poll_server.h"
-
-#include <read.h>
-#include <handle.h>
-#include <respond.h>
-#include <broadcast.h>
+#include "objects.h"
+#include "poll_server.h"
 
 #include <arpa/inet.h>
 #include <errno.h>
@@ -89,15 +84,6 @@ static int get_conn_index(const int *client_fds);
  * @return 0 on success, -1 and set errno on failure
  */
 static int poll_comm(struct core_object *co, struct state_object *so, struct pollfd *pollfds);
-
-/**
- * reset_poll_state
- * <p>
- * Free the request and response from the state.
- * </p>
- * @param so the state object
- */
-static void reset_poll_state(struct state_object * so);
 
 /**
  * poll_remove_connection
@@ -305,26 +291,6 @@ static int get_conn_index(const int *client_fds)
     return conn_index;
 }
 
-enum pollin_handle_result {
-    POLLIN_HANDLE_RESULT_OK,
-    POLLIN_HANDLE_RESULT_EOF,
-    POLLIN_HANDLE_RESULT_FATAL,
-};
-
-static bool pollin_handle(struct core_object *co, struct state_object *so, struct pollfd *pollfd) {
-    const int read_request_result = co->handlers.read_request(pollfd->fd, so);
-    if (read_request_result == READ_REQUEST_SUCCESS) {
-        co->handlers.handle_request(co);
-    }
-    if (read_request_result != READ_REQUEST_EOF) {
-        if (co->handlers.write_response(pollfd->fd, so) == -1) {
-            return POLLIN_HANDLE_RESULT_FATAL;
-        }
-    }
-    reset_poll_state(so);
-    return read_request_result == READ_REQUEST_EOF ? POLLIN_HANDLE_RESULT_EOF : POLLIN_HANDLE_RESULT_OK;
-}
-
 static int poll_comm(struct core_object *co, struct state_object *so, struct pollfd *pollfds)
 {
     struct pollfd *pollfd;
@@ -335,7 +301,7 @@ static int poll_comm(struct core_object *co, struct state_object *so, struct pol
         bool remove_connection = false;
         if (pollfd->revents == POLLIN)
         {
-            const int pollin_result = pollin_handle(co, so, pollfd);
+            const int pollin_result = co->pollin_handler(co, so, pollfd->fd);
             if (pollin_result == POLLIN_HANDLE_RESULT_FATAL) {
                 return -1;
             }
@@ -351,12 +317,6 @@ static int poll_comm(struct core_object *co, struct state_object *so, struct pol
     }
     
     return 0;
-}
-
-static void reset_poll_state(struct state_object * so) {
-    destroy_request(&so->req);
-    destroy_response(&so->res);
-    so->broadcast = false;
 }
 
 static void
@@ -385,9 +345,6 @@ poll_remove_connection(struct core_object *co, struct state_object *so, struct p
 
 void destroy_poll_state(struct core_object *co, struct state_object *so)
 {
-
-    reset_poll_state(so);
-
     close_fd_report_undefined_error(so->listen_fd, "state of listen socket is undefined.");
     
     for (size_t sfd_num = 0; sfd_num < MAX_CONNECTIONS; ++sfd_num)
