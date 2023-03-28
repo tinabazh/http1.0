@@ -1,5 +1,5 @@
-#include <core-lib/objects.h>
-#include <core-lib/util.h>
+#include <objects.h>
+#include <util.h>
 
 #include <arpa/inet.h>
 #include <dlfcn.h>
@@ -243,7 +243,7 @@ int write_fully(int fd, void * data, size_t size) {
     return 0;
 }
 
-int read_fully(int fd, void * data, size_t size) {
+enum read_fully_result read_fully(int fd, void * data, size_t size) {
     if (size <= 0) {
         return READ_FULLY_SUCCESS;
     }
