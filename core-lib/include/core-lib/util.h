@@ -97,6 +97,7 @@ enum read_fully_result{
     READ_FULLY_SUCCESS,
     READ_FULLY_FAILURE,
     READ_FULLY_EOF,
+    READ_FULLY_MORE_DATA,
 };
 
 /**
