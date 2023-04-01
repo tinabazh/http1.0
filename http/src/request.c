@@ -2,6 +2,8 @@
 #include <core-lib/receiver.h>
 #include <string.h>
 
+#define HTTP_VERSION "HTTP/1.1"
+
 enum read_request_result read_with_delim(char * buff, struct receiver *receiver, uint32_t buff_size, char delim){
     uint32_t str_size = buff_size - 1;
     enum read_fully_result read_fully_result = receiver_read_until(receiver, buff, &str_size, delim);
@@ -52,6 +54,16 @@ enum read_request_result read_request(int fd, struct state_object * so, struct h
     enum read_request_result read_fully_result = read_with_delim(&req->request_uri, &receiver, sizeof(req->request_uri), ' ');
     if (read_fully_result != READ_REQUEST_SUCCESS){
         return read_fully_result;
+    }
+
+    char http_version [9]; // 8 + 1 for \0
+    read_fully_result = read_with_delim(http_version, &receiver, sizeof(http_version), '\x0d');
+    if (read_fully_result != READ_REQUEST_SUCCESS){
+        return read_fully_result;
+    }
+    if (strcmp(http_version, HTTP_VERSION) != 0){
+        // TODO set response error code
+        return READ_REQUEST_ERROR;
     }
 
     return READ_REQUEST_SUCCESS;
