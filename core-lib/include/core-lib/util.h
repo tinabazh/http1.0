@@ -93,11 +93,12 @@ void destroy_core_object(struct core_object *co);
  */
 int write_fully(int fd, void * data, size_t size);
 
+
 enum read_fully_result{
     READ_FULLY_SUCCESS,
     READ_FULLY_FAILURE,
     READ_FULLY_EOF,
-    READ_FULLY_MORE_DATA,
+    READ_FULLY_MORE_DATA, // if size of buffer is less than data in the socket and we still haven't reached the delim.
 };
 
 /**

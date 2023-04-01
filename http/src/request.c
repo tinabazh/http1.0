@@ -2,12 +2,9 @@
 #include <core-lib/receiver.h>
 #include <string.h>
 
-int read_request(int fd, struct state_object * so, struct http_request * req) {
-    char method_str[5];
-    struct receiver receiver;
-    receiver_init(&receiver, fd);
-    uint32_t method_str_size = sizeof(method_str) - 1;
-    enum read_fully_result read_fully_result = receiver_read_until(&receiver, method_str, &method_str_size, ' ');
+enum read_request_result read_with_delim(char * buff, struct receiver *receiver, uint32_t buff_size, char delim){
+    uint32_t str_size = buff_size - 1;
+    enum read_fully_result read_fully_result = receiver_read_until(receiver, buff, &str_size, delim);
 
     switch(read_fully_result) {
         case READ_FULLY_FAILURE:
@@ -22,8 +19,24 @@ int read_request(int fd, struct state_object * so, struct http_request * req) {
             ;
             // Nothing
     }
-    method_str[method_str_size] = '\0';
+    buff[str_size] = '\0';
 
+    char ch;
+    read_fully_result = receiver_read(receiver, &ch, 1);
+    // no need to check there is definitely a space. Ensured by receiver_read_until that returns success when it meets delim.
+    return READ_REQUEST_SUCCESS;
+}
+
+enum read_request_result read_request(int fd, struct state_object * so, struct http_request * req) {
+    char method_str[5];
+    struct receiver receiver;
+    receiver_init(&receiver, fd);
+
+    enum read_request_result read_delim = read_with_delim(method_str, &receiver,
+            sizeof (method_str)/ sizeof (method_str[0]), ' ');
+    if (read_delim != READ_REQUEST_SUCCESS){
+        return read_delim;
+    }
     if (strcmp(method_str, "GET") == 0) {
         req->method = HTTP_METHOD_GET;
     } else if (strcmp(method_str, "POST") == 0) {
@@ -36,36 +49,10 @@ int read_request(int fd, struct state_object * so, struct http_request * req) {
         return READ_REQUEST_ERROR;
     }
 
-    char ch;
-    read_fully_result = receiver_read(&receiver, &ch, 1);
-    // TODO: too much boilerplate
-    if (read_fully_result == READ_FULLY_FAILURE) {
-        return READ_REQUEST_ERROR;
-    } else if (read_fully_result == READ_FULLY_EOF) {
-        return READ_REQUEST_EOF;
+    enum read_request_result read_fully_result = read_with_delim(&req->request_uri, &receiver, sizeof(req->request_uri), ' ');
+    if (read_fully_result != READ_REQUEST_SUCCESS){
+        return read_fully_result;
     }
-    if (ch != ' ') {
-        // Invalid request: method must be followed by a space
-        return READ_REQUEST_ERROR;
-    }
-
-    method_str_size = sizeof(req->request_uri) - 1;
-    read_fully_result = receiver_read_until(&receiver, req->request_uri, &method_str_size, ' ');
-    // TODO: too much duplicate code below
-    switch(read_fully_result) {
-        case READ_FULLY_FAILURE:
-            return READ_REQUEST_ERROR;
-        case READ_FULLY_MORE_DATA:
-            // TODO: set error code to "Bad request"
-            return READ_REQUEST_ERROR;
-        case READ_FULLY_EOF:
-            return READ_REQUEST_EOF;
-        case READ_FULLY_SUCCESS:
-        default:
-            ;
-            // Nothing
-    }
-    req->request_uri[method_str_size] = '\0';
 
     return READ_REQUEST_SUCCESS;
 }

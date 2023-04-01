@@ -18,8 +18,8 @@ enum read_fully_result receiver_read(struct receiver * this, void * data, uint32
 
     // First, deliver preexisting data
     // Receiver is not a circular buffer. It must deliver all preexisting data before resetting
-    // Thus, start is always >= end
-    uint32_t deliver = this->end - this->start;
+    // Thus, start is always <= end
+    uint32_t deliver = this->end - this->start;// located in the buffer, can be fulled partly or fully
     if (size < deliver) {
         deliver = size;
     }
@@ -98,9 +98,10 @@ static bool receiver_deliver_until(struct receiver * this, void * data, uint32_t
     return false;
 }
 
+
 enum read_fully_result receiver_read_until(struct receiver * this, void * data, uint32_t* ret_size, char delimiter) {
     uint32_t ret_buf_size = *ret_size;
-    bool reached;
+    bool reached; // reached the delimiter
     do {
         uint32_t delivered_size = ret_buf_size;
         reached = receiver_deliver_until(this, data, &delivered_size, delimiter);

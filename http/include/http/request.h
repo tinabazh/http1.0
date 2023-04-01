@@ -5,17 +5,26 @@
 
 #include <core-lib/objects.h>
 
+/**
+ * Provide the type of request: GET, POST, or HEAD
+ */
 enum http_method {
     HTTP_METHOD_GET,
     HTTP_METHOD_POST,
     HTTP_METHOD_HEAD,
 };
 
+/**
+ * By the documentation, we are supposed to provide a method and uri that is array of chars
+ */
 struct http_request {
     enum http_method method;
     char request_uri[MAX_REQUEST_URI_LENGTH];
 };
 
+/**
+ * Provide the code of success
+ */
 enum read_request_result {
     READ_REQUEST_SUCCESS,
     READ_REQUEST_ERROR,
@@ -23,6 +32,6 @@ enum read_request_result {
 };
 
 // returns read_request_result
-int read_request(int fd, struct state_object * so, struct http_request * req);
+enum read_request_result read_request(int fd, struct state_object * so, struct http_request * req);
 
 #endif //HTTPSERVER_REQUEST_H
