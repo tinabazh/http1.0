@@ -47,53 +47,6 @@ struct header {
     uint16_t body_size; // 16 bits
 };
 
-enum request_result_code{
-    REQUEST_RESULT_SUCCESS = 200,
-    REQUEST_RESULT_CREATED = 201,
-    REQUEST_RESULT_NOT_FOUND = 404,
-    REQUEST_RESULT_INVALID = 405,
-    REQUEST_RESULT_CONFLICT = 409, // not defined in the protocol
-    REQUEST_RESULT_INT_SERV_ERR = 500,
-    REQUEST_RESULT_CANNOT_HANDLE = 503,
-    REQUEST_RESULT_TIMEOUT = 504,
-    REQUEST_RESULT_WRONG_VERSION = 505
-};
-
-/**
- * Represents a request message. Only one request struct will be filled at a given time, all others will be NULL.
- */
-struct request {
-    struct header header;
-    char * raw_body;
-    uint32_t raw_header;
-    char * sender_ip; // only available when reading
-    int result_code; // what the result of the request was
-
-    // types of requests
-    struct create_user_req * create_user;
-    struct create_channel_req * create_channel;
-    struct create_message_req * create_message;
-    struct create_auth_req * create_auth;
-};
-
-/**
- * Represents a response message. Only one response struct will be filled at a given time, all others will be NULL.
- */
-struct response {
-    struct header header;
-    char * raw_body;
-    uint32_t raw_header;
-    char * sender_ip; // only available when reading
-    int result_code;
-
-    // types of responses
-    struct create_user_res * create_user;
-    struct create_user_non_unique_error_res * create_user_non_unique_error;
-    struct create_channel_res * create_channel;
-    struct create_message_res * create_message;
-    struct create_auth_res * create_auth;
-    struct standard_error_res * standard_error;
-};
 
 /**
  * Represents a connection to the server as an active user (not to be confused with the user DB).

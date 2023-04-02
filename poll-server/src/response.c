@@ -8,35 +8,6 @@
 
 #define DELIM "\x03"
 
-// RESPONSE //
-
-struct response * init_response(void) {
-    struct response * res = malloc(sizeof(struct response));
-    if (res == NULL) {
-        perror("malloc response");
-        return NULL;
-    }
-    memset(res, 0, sizeof(struct response));
-
-    return res;
-}
-
-void destroy_response(struct response ** res) {
-    if (*res != NULL) {
-        if ((*res)->raw_body != NULL) {
-            free((*res)->raw_body);
-        }
-        if ((*res)->sender_ip != NULL) {
-            free((*res)->sender_ip);
-        }
-        destroy_create_auth_res(&(*res)->create_auth);
-        destroy_standard_error_res(&(*res)->standard_error);
-        destroy_create_user_non_unique_error_res(&(*res)->create_user_non_unique_error);
-        free(*res);
-    }
-    *res = NULL;
-}
-
 // STANDARD RESPONSES //
 
 int rawify_standard_response(int code, char ** body_dst) {
