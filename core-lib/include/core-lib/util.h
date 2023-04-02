@@ -98,7 +98,7 @@ enum read_fully_result{
     READ_FULLY_SUCCESS,
     READ_FULLY_FAILURE,
     READ_FULLY_EOF,
-    READ_FULLY_MORE_DATA, // if size of buffer is less than data in the socket and we still haven't reached the delim.
+    READ_FULLY_UNEXPECTED_RESULT, // if size of buffer is less than data in the socket and we still haven't reached the delim.
 };
 
 /**

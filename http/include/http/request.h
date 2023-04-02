@@ -27,11 +27,18 @@ struct http_request {
  */
 enum read_request_result {
     READ_REQUEST_SUCCESS,
-    READ_REQUEST_ERROR,
+    READ_REQUEST_INTERNAL_ERROR,
     READ_REQUEST_EOF,
+    READ_REQUEST_BAD_REQUEST,
 };
 
-// returns read_request_result
+/**
+ * returns read_request_result
+ * @param fd
+ * @param so
+ * @param req
+ * @return
+ */
 enum read_request_result read_request(int fd, struct state_object * so, struct http_request * req);
 
 #endif //HTTPSERVER_REQUEST_H

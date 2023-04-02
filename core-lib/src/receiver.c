@@ -82,6 +82,7 @@ static bool receiver_deliver_until(struct receiver * this, void * data, uint32_t
         }
     }
     if (ret_buf_size < this->end - this->start) { // <data> buffer was not enough
+        // Invalid request
         // ret_size remains unchanged as the whole buffer was used
         this->start = max_ind;
         // Check for an edge case. There's a chance the delimiter is in preexisting data
@@ -92,7 +93,7 @@ static bool receiver_deliver_until(struct receiver * this, void * data, uint32_t
     // So doing nothing here.
     // }
     // Not reached delimiter yet, resetting the buffer
-    *ret_size =  this->end - this->start;
+    *ret_size = this->end - this->start;
     this->start = this->end = 0;
 
     return false;
@@ -100,7 +101,7 @@ static bool receiver_deliver_until(struct receiver * this, void * data, uint32_t
 
 
 enum read_fully_result receiver_read_until(struct receiver * this, void * data, uint32_t* ret_size, char delimiter) {
-    uint32_t ret_buf_size = *ret_size;
+    uint32_t ret_buf_size = *ret_size; // Indicates how much space is left in the output buffer
     bool reached; // reached the delimiter
     do {
         uint32_t delivered_size = ret_buf_size;
@@ -111,20 +112,23 @@ enum read_fully_result receiver_read_until(struct receiver * this, void * data, 
             *ret_size -= ret_buf_size;
             return READ_FULLY_SUCCESS;
         } else {
-            // The buffer is empty at this point
-            ssize_t result = recv(this->fd, this->buffer, RECEIVER_BUFFER_LENGTH, MSG_NOSIGNAL);
-            if (result == -1) {
-                perror("receiver_read_until");
-                return READ_FULLY_FAILURE;
+            if (ret_buf_size != 0) {
+                // The buffer is empty at this point
+                ssize_t result = recv(this->fd, this->buffer, RECEIVER_BUFFER_LENGTH, MSG_NOSIGNAL);
+                if (result == -1) {
+                    perror("receiver_read_until");
+                    return READ_FULLY_FAILURE;
+                }
+                if (result == 0) {
+                    // If it came to this, there was not enough data in the socket
+                    return READ_FULLY_EOF;
+                }
+                this->end = result;
             }
-            if (result == 0) {
-                // If it came to this, there was not enough data in the socket
-                return READ_FULLY_EOF;
-            }
-            this->end = result;
         }
-    } while (!reached && ret_buf_size);
+    } while (ret_buf_size);
 
-    *ret_size -= ret_buf_size;
-    return READ_FULLY_SUCCESS;
+    // Ran out of space in the output buffer yet not reached the delimiter yet
+    // Invalid request
+    return READ_FULLY_UNEXPECTED_RESULT;
 }
