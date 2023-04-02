@@ -301,7 +301,7 @@ static int poll_comm(struct core_object *co, struct state_object *so, struct pol
         bool remove_connection = false;
         if (pollfd->revents == POLLIN)
         {
-            const int pollin_result = co->pollin_handler(co, so, pollfd->fd);
+            const enum pollin_handle_result pollin_result = co->pollin_handler(co, so, pollfd->fd);
             if (pollin_result == POLLIN_HANDLE_RESULT_FATAL) {
                 return -1;
             }

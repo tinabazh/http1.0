@@ -3,6 +3,6 @@
 
 #include <core-lib/objects.h>
 
-int pollin_handle_http(struct core_object *co, struct state_object *so, int fd);
+enum pollin_handle_result pollin_handle_http(struct core_object *co, struct state_object *so, int fd);
 
 #endif //HTTPSERVER_HANDLERS_H

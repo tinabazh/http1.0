@@ -9,13 +9,13 @@ struct state_object;
 struct pollfd;
 
 enum pollin_handle_result {
-    POLLIN_HANDLE_RESULT_OK,
-    POLLIN_HANDLE_RESULT_EOF,
-    POLLIN_HANDLE_RESULT_FATAL,
+    POLLIN_HANDLE_RESULT_OK, // Wait for another request from the same client
+    POLLIN_HANDLE_RESULT_EOF, // The connection has been closed from either side (client or our handler)
+    POLLIN_HANDLE_RESULT_FATAL, // Something terrible happened, the server will terminate
 };
 
 // returns pollin_handle_result
-typedef int (*pollin_handler)(struct core_object *co, struct state_object *so, int fd);
+typedef enum pollin_handle_result (*pollin_handler)(struct core_object *co, struct state_object *so, int fd);
 
 /**
  * core_object
