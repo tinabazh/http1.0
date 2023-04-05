@@ -12,13 +12,15 @@ enum res_result_code{
     RESPONSE_RESULT_INVALID = 405,
     RESPONSE_RESULT_CONFLICT = 409, // not defined in the protocol
     RESPONSE_RESULT_INT_SERV_ERR = 500,
+    RESPONSE_RESULT_METHOD_NOT_IMPLEMENTED = 501,
     RESPONSE_RESULT_CANNOT_HANDLE = 503,
     RESPONSE_RESULT_TIMEOUT = 504,
     RESPONSE_RESULT_WRONG_VERSION = 505
 };
 
 bool write_status_line(enum res_result_code res_code, int fd);
+bool write_content_length(size_t length, int fd);
 
 // return -1 in case of error
-bool serve_file(const char* file_name, int fd);
+bool serve_file(const char* file_name, int fd, bool get);
 #endif //HTTPSERVER_RESPONSE_H

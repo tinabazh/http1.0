@@ -25,8 +25,16 @@ bool write_status_line(enum res_result_code res_code, int fd) {
     return length >= 0;
 }
 
+bool write_content_length(size_t length, int fd) {
+    int headers_length = dprintf(fd,
+                                 "Content-Length: %zu\r\n"
+                                 "\r\n",
+                                 length);
+    return headers_length > 0;
+}
+
 // return false in case of error
-bool serve_file(const char* file_name, int fd) {
+bool serve_file(const char* file_name, int fd, bool get) {
     if (!file_name){
         return false;
     }
@@ -36,6 +44,7 @@ bool serve_file(const char* file_name, int fd) {
     // Open the file which is either HTML, CSS, JS
     int file_fd = open(&file_name[1], O_RDONLY);
     struct stat file_stat;
+    file_stat.st_size = 0;
     if (file_fd < 0) {
         // TODO: there could be other reasons for the error except file not existing
         res_code = RESPONSE_RESULT_NOT_FOUND;
@@ -48,30 +57,23 @@ bool serve_file(const char* file_name, int fd) {
         }
     }
 
+    // Write the response status line and headers
     // We cannot send anything if it fails
-    if (write_status_line(res_code, fd) == false){
+    if (!write_status_line(res_code, fd) || !write_content_length(file_stat.st_size, fd)){
+        close(file_fd);
         return false;
     }
 
     if (file_fd >= 0) {
-        size_t file_size = file_stat.st_size;
-        // Write the response status line and headers
-        int headers_length = dprintf(fd,
-                                     "Content-Length: %zu\r\n"
-                                     "\r\n",
-                                     file_size);
-
-        if (headers_length < 0) {
-            close(file_fd);
-            return false;
-        }
-        // Send the file in chunks
-        char buffer[BUFFER_SIZE];
-        ssize_t bytes_read;
-        while ((bytes_read = read(file_fd, buffer, BUFFER_SIZE)) > 0) {
-            if (write(fd, buffer, bytes_read) != bytes_read) {
-                close(file_fd);
-                return false;
+        if (get) {
+            // Send the file in chunks
+            char buffer[BUFFER_SIZE];
+            ssize_t bytes_read;
+            while ((bytes_read = read(file_fd, buffer, BUFFER_SIZE)) > 0) {
+                if (write(fd, buffer, bytes_read) != bytes_read) {
+                    close(file_fd);
+                    return false;
+                }
             }
         }
         close(file_fd);

@@ -8,10 +8,13 @@ bool handle_request(enum read_request_result read_request_result, struct http_re
     // TODO handle EOF in serve and write
     // TODO check HTTP method - this is for GET only.
     if (read_request_result == READ_REQUEST_SUCCESS) {
-        return (serve_file(req->request_uri, fd));
+        if (req->method == HTTP_METHOD_GET || req->method == HTTP_METHOD_HEAD) {
+            return (serve_file(req->request_uri, fd, req->method == HTTP_METHOD_GET));
+        } else {
+            return(write_status_line(RESPONSE_RESULT_METHOD_NOT_IMPLEMENTED, fd) && write_content_length(0, fd));
+        }
     } else if (read_request_result == READ_REQUEST_BAD_REQUEST) {
-        // TODO for most response code we must Content-length header with the value of zero.
-        return(write_status_line(RESPONSE_RESULT_BAD_REQUEST, fd));
+        return(write_status_line(RESPONSE_RESULT_BAD_REQUEST, fd) && write_content_length(0, fd) );
     }
     return false;
 }
