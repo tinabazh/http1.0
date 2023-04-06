@@ -26,6 +26,7 @@
 #define API_RUN "run_server"
 #define API_CLOSE "close_server"
 
+static in_port_t g_default_port = 80;
 
 /**
  * application_settings
@@ -156,7 +157,7 @@ static struct dc_application_settings *create_settings(const struct dc_env *env,
                     dc_in_port_t_from_string,
                     "port",
                     dc_in_port_t_from_config,
-                    DEFAULT_PORT},
+                    &g_default_port},
             {(struct dc_setting *) settings->ip_addr,
                     dc_options_set_string,
                     "ip-addr",
