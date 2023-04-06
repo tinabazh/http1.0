@@ -2,7 +2,8 @@
 #include <core-lib/receiver.h>
 #include <string.h>
 
-#define HTTP_VERSION "HTTP/1.1"
+#define HTTP_VERSION_1_0 "HTTP/1.0"
+#define HTTP_VERSION_1_1 "HTTP/1.1"
 
 static enum read_request_result convert_read_fully_result(enum read_fully_result result) {
     switch(result) {
@@ -77,7 +78,7 @@ enum read_request_result read_request(int fd, struct state_object * so, struct h
     if (read_req_result != READ_REQUEST_SUCCESS){
         return read_req_result;
     }
-    if (strcmp(http_version, HTTP_VERSION) != 0){
+    if (strcmp(http_version, HTTP_VERSION_1_0) != 0 && strcmp(http_version, HTTP_VERSION_1_1) != 0){
         return READ_REQUEST_BAD_REQUEST;
     }
 

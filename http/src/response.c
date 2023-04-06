@@ -21,7 +21,7 @@ static const char *get_status_message(enum res_result_code res_code) {
 }
 
 bool write_status_line(enum res_result_code res_code, int fd) {
-    int length = dprintf(fd, "HTTP/1.1 %d %s\r\n", res_code, get_status_message(res_code));
+    int length = dprintf(fd, "HTTP/1.0 %d %s\r\n", res_code, get_status_message(res_code));
     return length >= 0;
 }
 
