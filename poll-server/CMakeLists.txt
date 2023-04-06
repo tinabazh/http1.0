@@ -3,12 +3,10 @@ set(INCLUDE_DIR include)
 set(SOURCE_LIST
         ${SOURCE_DIR}/api_functions.c
         ${SOURCE_DIR}/poll_server.c
-        ${SOURCE_DIR}/response.c
         )
 set(HEADER_LIST
         ${INCLUDE_DIR}/objects.h
         ${INCLUDE_DIR}/poll_server.h
-        ${INCLUDE_DIR}/response.h
         )
 
 set(SANITIZE TRUE)

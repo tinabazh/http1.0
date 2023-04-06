@@ -2,7 +2,6 @@
 #define SCALABLE_SERVER_POLL_OBJECTS_H
 
 #include <core-lib/objects.h>
-#include <response.h>
 
 #include <ndbm.h>
 #include <stdbool.h>
