@@ -6,7 +6,6 @@
 
 bool handle_request(enum read_request_result read_request_result, struct http_request * req, int fd) {
     // TODO handle EOF in serve and write
-    // TODO check HTTP method - this is for GET only.
     if (read_request_result == READ_REQUEST_SUCCESS) {
         if (req->method == HTTP_METHOD_GET || req->method == HTTP_METHOD_HEAD) {
             return (serve_file(req->request_uri, fd, req->method == HTTP_METHOD_GET));
