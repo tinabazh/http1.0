@@ -1,6 +1,8 @@
-#include "objects.h"
 #include "poll_server.h"
+#include "objects.h"
+#include <core-lib/objects.h>
 
+#include <stdbool.h>
 #include <arpa/inet.h>
 #include <errno.h>
 #include <mem_manager/manager.h>
@@ -9,8 +11,6 @@
 #include <signal.h>
 #include <string.h>
 #include <sys/socket.h> // back compatability
-#include <sys/types.h>  // back compatability
-#include <time.h>
 #include <unistd.h>
 
 // NOLINTBEGIN(cppcoreguidelines-avoid-non-const-global-variables): must be non-const
@@ -109,6 +109,11 @@ poll_remove_connection(struct core_object *co, struct state_object *so, struct p
  * @param err_msg the error message to print
  */
 static void close_fd_report_undefined_error(int fd, const char *err_msg);
+
+/**
+ * The number of connections that can be queued on the listening socket.
+ */
+#define CONNECTION_QUEUE 100
 
 struct state_object *setup_poll_state(struct memory_manager *mm)
 {

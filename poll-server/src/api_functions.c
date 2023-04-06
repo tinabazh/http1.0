@@ -11,11 +11,6 @@ int initialize_server(struct core_object *co)
         return ERROR;
     }
 
-//    int db_init = init_db(co);
-//    if(db_init == -1){
-//        close_db(co);
-//    }
-
     if (open_poll_server_for_listen(co, co->so, &co->listen_addr) == -1)
     {
         return ERROR;
@@ -40,7 +35,6 @@ int close_server(struct core_object *co)
 {
     printf("CLOSE POLL SERVER\n");
 
-    // close_db(co);
     destroy_poll_state(co, co->so);
     
     return EXIT;

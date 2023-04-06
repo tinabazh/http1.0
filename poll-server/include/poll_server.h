@@ -1,6 +1,9 @@
 #ifndef SCALABLE_SERVER_POLL_SERVER_H
 #define SCALABLE_SERVER_POLL_SERVER_H
 
+#include "objects.h"
+#include <core-lib/objects.h>
+
 /**
  * setup_poll_state
  * <p>
